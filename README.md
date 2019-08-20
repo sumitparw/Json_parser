@@ -1,5 +1,6 @@
 # Json_parser
 Check: "http://www-scf.usc.edu/~parwal/sumithw4.html".
+Reference solution video: https://www.youtube.com/watch?v=k53FSpX05zs&feature=youtu.be
 The project is a part of the course CSCI 571 Web Technologies that I took at the University of Southern California.
 
 ## Overview
