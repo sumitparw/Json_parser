@@ -1,0 +1,157 @@
+ <!DOCTYPE html>
+<html>
+<head>
+  <title>HOMEWORK 4</title>
+  <script type="text/javascript">
+     function check_Err() {
+        document.getElementById("error_msg").innerHTML = "";
+        return;
+    }
+    var film_data;
+    function film_json() {
+      var name_file = document.getElementById("filmlist_filename").value;
+      if(name_file.length === 0 || !name_file.trim()) {
+          document.getElementById("error_message").innerHTML = "Enter file name";
+          return;
+      }
+      var dataobj = new XMLHttpRequest();
+      dataobj.overrideMimeType("application/json");
+      dataobj.open('GET', name_file, false);
+      try {
+          dataobj.send();
+      } catch(err) {
+          alert('File not Found');
+          return;
+      }
+      var response;
+      if (dataobj.readyState == 4 && dataobj.status == "200") {
+          response = dataobj.responseText;
+      } else {
+          alert('File not Found.');
+          return;
+      }
+
+      try {
+          film_data = JSON.parse(response);
+      } catch(err) {
+           alert(err);
+          return;
+      }
+      console.log(film_data);
+      var row_data=[];
+      var header_info = []
+      var parent_data = film_data['Mainline']['Table'];
+      if(!(parent_data.hasOwnProperty("Header") && parent_data['Header'].hasOwnProperty("Data") && parent_data.hasOwnProperty("Row") && parent_data['Row'].length > 0) ) {
+          alert("!!Error!!, Either there are no rows or no required data present");
+          return;
+      }
+      for(var index=0; index < film_data['Mainline']['Table']['Header']['Data'].length; index++) {
+          header_info[index] = film_data['Mainline']['Table']['Header']['Data'][index];
+      }
+      var sfull_tab = film_table(film_data, header_info);
+}
+    function film_table(film_data, header_info) {
+      // var table = document.getElementById("data_table");
+      var film_content = '<table style="border:1px solid black">';
+      var row_data = film_data['Mainline']['Table']['Row'];
+        film_content += '<tr>';
+        for(var index=0; index < film_data['Mainline']['Table']['Header']['Data'].length; index++ ) {
+            film_content += '<th style="border:1px solid black;">';
+            var val = header_info[index];
+            film_content += val + '</th>';
+        }
+        film_content += '</tr>';
+      for (var index=0; index < row_data.length; index++) {
+        film_content += '<tr>';
+            var keys = Object.keys(row_data[index]);
+        for(var i=0; i < keys.length; i++) {
+          if(i==0) {
+            film_content += '<td style="border:1px solid black; width: 10px">';
+          } else if(i==2) {
+            film_content += '<td style="border:1px solid black; width: 223px">';
+          } else if(i==3) {
+            film_content += '<td style="border:1px solid black; width: 20px">';
+          } else {
+            film_content += '<td style="border:1px solid black; height: 20px">';
+          }
+          
+          var val = row_data[index][keys[i]] 
+          var text_val = "";
+                if(val != "") {
+              if(keys[i]=='Hubs') {
+                var new_val = "";
+                        if(val['Hub'].length > 0) {
+                    new_val = '<ul><li><b>'+val['Hub'][0]+'</b></li><br>'
+                    for(var j=1; j<val['Hub'].length; j++){
+                      new_val +='<li>' + val['Hub'][j] + '</li><br>'
+                    }
+                            new_val += '</ul>';
+                        }
+                text_val = new_val;
+              } else if (keys[i]=='HomePage') {
+                text_val = '<a href="'+val+'">' + val +'</a>';
+              } else if(keys[i]=='Logo') {
+                text_val = '<img src="'+val+'" style="width:130px">'
+              } else {
+                text_val = val;
+              }
+                }
+          film_content += text_val + '</td>';
+          
+        }
+        film_content += '</tr>'
+      }
+      film_content += '</table>'
+      var display_content = '<!DOCTYPE html><html><head><title></title></head><body><div id="content">' + film_content + '</body></html>';
+      var new_tab = window.open('','HW4','width=1050,height=800,scrollbars=1,resizable=1');
+      new_tab.document.write("<title>Highest-grossing film</title>");
+      new_tab.document.open();
+      new_tab.document.write(display_content);
+      new_tab.document.close();
+    }
+ 
+   
+  </script>
+    <style type="text/css">
+        #display {
+          margin-top: 90px;
+          text-align: center;
+           
+        }
+         #display1 {
+          text-align: center;
+           
+        }
+         #display2 {
+          margin-top: 10px;
+          text-align: center;
+           
+        }
+        #submit_query {
+            border-color: grey;
+            background-color: white;
+            border:0.5px solid;
+        }
+        #error_message {
+            color: red;
+            position: fixed;
+            left: 731px;
+            width: 190px;
+        }
+        
+    </style>
+</head>
+<body>
+
+<div id="display">
+    <h3>Enter URL for Highest-grossing films List JSON File</h3>
+</div>
+<div  id="display1">
+    <input type="text" name="filmlist" id="filmlist_filename"  onfocus="check_Err()" onkeypress="colorchange()">
+</div>
+    <span id="error_message"></span>
+<div  id="display2">
+    <button type="submit" name="query_button" id="submit_query" onclick="film_json()">Submit Query</button>
+</div>
+</body>
+</html>
